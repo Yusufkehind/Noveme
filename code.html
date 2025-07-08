@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student AI Toolkit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS - Theming, Layout, and Animations */
+
+        /* 1. Global Styles & Variables */
+        :root {
+            --bg-color: #1E1E2F;
+            --header-bg: #2B2D42;
+            --card-bg: #3A3D5B;
+            --text-color: #EAEAEA;
+            --accent-color: #FFD700;
+            --accent-hover: #E6C200;
+            --shadow-color: rgba(255, 215, 0, 0.2);
+            --font-family: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 15% 50%, rgba(255, 215, 0, 0.05), transparent 30%),
+                radial-gradient(circle at 85% 30%, rgba(80, 80, 150, 0.1), transparent 40%),
+                radial-gradient(circle at 50% 90%, rgba(255, 215, 0, 0.05), transparent 35%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* 2. Header */
+        .site-header {
+            background-color: var(--header-bg);
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-bottom: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--card-bg);
+        }
+
+        .site-header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px var(--shadow-color);
+        }
+
+        .site-header p {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: var(--text-color);
+        }
+
+        /* 3. Tool Grid */
+        .tool-grid {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        /* 4. Tool Card */
+        .tool-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border: 1px solid transparent;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-10px);
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border-color: var(--accent-hover);
+        }
+
+        .tool-card .icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            transition: filter 0.3s ease;
+        }
+
+        .tool-card:hover .icon {
+            filter: invert(1) brightness(0.1);
+        }
+
+        .tool-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .tool-card p {
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+            opacity: 0.8;
+        }
+
+        .tool-card .btn-open-tool {
+            background-color: var(--header-bg);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .tool-card:hover .btn-open-tool {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-color: var(--bg-color);
+        }
+
+        /* 5. Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: var(--header-bg);
+            margin: 5% auto;
+            padding: 2rem;
+            border: 1px solid var(--card-bg);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            height: 90vh; /* Make modal content take up viewport height */
+            max-height: 800px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-bg);
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h2 {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+        }
+
+        .close-button {
+            color: var(--text-color);
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-button:hover {
+            color: var(--accent-color);
+        }
+
+        .modal-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tool-interface {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+        
+        .input-group, .output-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .output-group {
+             flex-grow: 1;
+        }
+        
+        textarea, select, input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--card-bg);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea {
+            min-height: 120px;
+            flex-grow: 1; /* Allows it to expand */
+        }
+        
+        .output-area {
+            min-height: 150px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--card-bg);
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .controls, .output-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #4a4d6b;
+        }
+        
+        .loader {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--card-bg);
+            border-top: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        #plagiarism-inputs { display: flex; gap: 1rem; }
+        #plagiarism-inputs .input-group { flex: 1; }
+
+        /* 6. Print Styles for PDF Download */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                font-family: 'Times New Roman', serif;
+                color: #000;
+            }
+        }
+        
+        #print-area {
+            display: none; /* Hidden from view, only used for printing */
+        }
+
+        /* 7. Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 8. Responsive Design */
+        @media (max-width: 1024px) {
+            .tool-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .site-header h1 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tool-grid {
+                grid-template-columns: 1fr;
+            }
+            .site-header h1 {
+                font-size: 2rem;
+            }
+            .site-header p {
+                font-size: 1rem;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 2.5% auto;
+                padding: 1.5rem;
+                height: 95vh;
+            }
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="site-header">
+            <h1>Student AI Toolkit</h1>
+            <p>All-in-One AI Tools for Students</p>
+        </header>
+
+        <main class="tool-grid">
+            <!-- Tool Cards will be dynamically generated by JS -->
+        </main>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="tool-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Tool Name</h2>
+                <span class="close-button">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modal-tool-interface" class="tool-interface">
+                    <!-- Tool specific interface will be injected here -->
+                </div>
+                
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <span>Processing...</span>
+                </div>
+
+                <div class="output-group">
+                    <label>Result:</label>
+                    <div id="output-area" class="output-area" contenteditable="true"></div>
+                    <div class="output-actions">
+                         <button id="copy-btn" class="btn btn-secondary">Copy</button>
+                         <button id="pdf-btn" class="btn btn-secondary">Download as PDF</button>
+                         <button id="txt-btn" class="btn btn-secondary">Download as TXT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden area for printing to PDF -->
+    <div id="print-area"></div>
+
+    <script>
+        // JavaScript - All Tool Logic and Interactivity
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- DATA & CONFIG ---
+            const tools = [
+                { id: 'essay', name: 'AI Essay Assistant', desc: 'Generates detailed essays from a topic.', icon: '📝' },
+                { id: 'summary', name: 'AI Summary Generator', desc: 'Converts long text or documents into concise summaries.', icon: '📄' },
+                { id: 'grammar', name: 'AI Grammar & Spell Checker', desc: 'Checks text for grammar and spelling errors with explanations.', icon: '✍️' },
+                { id: 'flashcard', name: 'Flashcard Generator', desc: 'Creates digital flashcards from your study notes.', icon: '📇' },
+                { id: 'citation', name: 'Citation Generator', desc: 'Automatically generates citations in APA, MLA, or Chicago format.', icon: '📚' },
+                { id: 'plagiarism', name: 'Plagiarism Checker', desc: 'Compares two text files to check for similarity.', icon: '🔍' },
+                { id: 'mindmap', name: 'Mind Map Creator', desc: 'Generates a structured mind map from text or notes.', icon: '🧠' },
+                { id: 'timer', name: 'Study Timer AI Coach', desc: 'A Pomodoro timer with motivational tips and session logs.', icon: '⏱️' },
+                { id: 'math', name: 'Math Problem Solver', desc: 'Solves math problems with detailed, step-by-step solutions.', icon: '🧮' },
+                { id: 'translator', name: 'AI Language Translator', desc: 'Translates text between multiple languages.', icon: '🌐' },
+            ];
+            
+            // Reusable SVG Icon
+            const toolIconSVG = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>`;
+
+            // --- DOM ELEMENTS ---
+            const toolGrid = document.querySelector('.tool-grid');
+            const modal = document.getElementById('tool-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalInterfaceContainer = document.getElementById('modal-tool-interface');
+            const closeModalBtn = document.querySelector('.close-button');
+            const outputArea = document.getElementById('output-area');
+            const loader = document.querySelector('.loader');
+            const copyBtn = document.getElementById('copy-btn');
+            const pdfBtn = document.getElementById('pdf-btn');
+            const txtBtn = document.getElementById('txt-btn');
+            const printArea = document.getElementById('print-area');
+            
+            let currentToolId = null;
+
+            // --- INITIALIZATION ---
+            function initialize() {
+                renderToolCards();
+                setupEventListeners();
+            }
+
+            // --- RENDER FUNCTIONS ---
+            function renderToolCards() {
+                toolGrid.innerHTML = tools.map(tool => `
+                    <div class="tool-card" data-tool-id="${tool.id}">
+                        ${tool.icon ? `<div class="icon-emoji" style="font-size: 48px;">${tool.icon}</div>` : toolIconSVG}
+                        <h2>${tool.name}</h2>
+                        <p>${tool.desc}</p>
+                        <button class="btn-open-tool">Open Tool</button>
+                    </div>
+                `).join('');
+            }
+            
+            // --- MODAL & UI LOGIC ---
+            function openModal(toolId) {
+                currentToolId = toolId;
+                const tool = tools.find(t => t.id === toolId);
+                modalTitle.textContent = tool.name;
+                outputArea.innerHTML = ''; // Clear previous results
+                
+                // Load saved data from local storage
+                const savedData = localStorage.getItem(`tool-output-${toolId}`);
+                if (savedData) {
+                    outputArea.innerHTML = savedData;
+                }
+                
+                renderToolInterface(toolId);
+                modal.style.display = 'block';
+            }
+
+            function closeModal() {
+                modal.style.display = 'none';
+                currentToolId = null;
+            }
+
+            function renderToolInterface(toolId) {
+                let html = '';
+                const commonControls = `
+                    <div class="controls">
+                        <select id="word-count-selector">
+                            <option value="300">Short (~300 words)</option>
+                            <option value="600" selected>Standard (~600 words)</option>
+                            <option value="1000">Long (~1000 words)</option>
+                        </select>
+                        <button id="generate-btn" class="btn">Generate</button>
+                    </div>`;
+
+                switch (toolId) {
+                    case 'essay':
+                    case 'summary':
+                    case 'grammar':
+                    case 'math':
+                    case 'mindmap':
+                        html = `
+                            <div class="input-group">
+                                <label for="text-input">Paste your text below or upload a file:</label>
+                                <textarea id="text-input" placeholder="Enter topic for essay, text to summarize, etc."></textarea>
+                                <div class="file-upload-wrapper">
+                                    <button class="btn btn-secondary">Upload .txt File</button>
+                                    <input type="file" id="file-input" accept=".txt">
+                                </div>
+                            </div>
+                            ${commonControls}
+                        `;
+                        break;
+                    case 'flashcard':
+                        html = `
+                             <div class="input-group">
+                                <label for="text-input">Paste your study notes below or upload a file:</label>
+                                <textarea id="text-input" placeholder="Term 1: Definition 1\nTerm 2: Definition 2..."></textarea>
+                                <div class="file-upload-wrapper">
+                                    <button class="btn btn-secondary">Upload .txt Notes</button>
+                                    <input type="file" id="file-input" accept=".txt">
+                                </div>
+                            </div>
+                            ${commonControls}
+                        `;
+                        break;
+                    case 'citation':
+                        html = `
+                            <div class="input-group">
+                                <label for="text-input">Paste sources below (one per line):</label>
+                                <textarea id="text-input" placeholder="e.g., Book Title, Author, Year..."></textarea>
+                            </div>
+                            <div class="controls">
+                                <select id="citation-style-selector">
+                                    <option value="APA">APA</option>
+                                    <option value="MLA">MLA</option>
+                                    <option value="Chicago">Chicago</option>
+                                </select>
+                                <button id="generate-btn" class="btn">Generate Citations</button>
+                            </div>
+                        `;
+                        break;
+                    case 'plagiarism':
+                        html = `
+                            <div id="plagiarism-inputs">
+                                <div class="input-group">
+                                    <label for="text-input-1">Source Text 1:</label>
+                                    <textarea id="text-input-1" placeholder="Paste first text here."></textarea>
+                                    <div class="file-upload-wrapper">
+                                        <button class="btn btn-secondary">Upload File 1</button>
+                                        <input type="file" id="file-input-1" accept=".txt">
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label for="text-input-2">Source Text 2:</label>
+                                    <textarea id="text-input-2" placeholder="Paste second text to compare."></textarea>
+                                    <div class="file-upload-wrapper">
+                                        <button class="btn btn-secondary">Upload File 2</button>
+                                        <input type="file" id="file-input-2" accept=".txt">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="controls">
+                                <button id="generate-btn" class="btn">Compare Texts</button>
+                            </div>
+                        `;
+                        break;
+                    case 'timer':
+                        html = `
+                            <div style="text-align: center; padding: 1rem 0;">
+                                <h3 id="timer-display" style="font-size: 4rem; color: var(--accent-color);">25:00</h3>
+                                <p id="timer-motivation">Ready to start a focused session?</p>
+                                <div class="controls" style="justify-content: center;">
+                                    <button id="timer-start" class="btn">Start</button>
+                                    <button id="timer-pause" class="btn btn-secondary">Pause</button>
+                                    <button id="timer-reset" class="btn btn-secondary">Reset</button>
+                                </div>
+                            </div>
+                             <div class="input-group">
+                                <label>Session Log:</label>
+                                <textarea id="text-input" readonly placeholder="Your completed sessions will be logged here."></textarea>
+                            </div>
+                        `;
+                        break;
+                    case 'translator':
+                        html = `
+                            <div class="input-group">
+                                <label for="text-input">Text to Translate:</label>
+                                <textarea id="text-input" placeholder="Enter text here..."></textarea>
+                            </div>
+                            <div class="controls">
+                                <select id="lang-from-selector"> <option value="en">English</option> <option value="es">Spanish</option> <option value="fr">French</option> <option value="de">German</option> </select>
+                                <span>to</span>
+                                <select id="lang-to-selector"> <option value="es">Spanish</option> <option value="en">English</option> <option value="fr">French</option> <option value="de">German</option> </select>
+                                <button id="generate-btn" class="btn">Translate</button>
+                            </div>
+                        `;
+                        break;
+                }
+                modalInterfaceContainer.innerHTML = html;
+                addToolSpecificListeners(toolId);
+            }
+
+            function showLoader() { loader.style.display = 'flex'; }
+            function hideLoader() { loader.style.display = 'none'; }
+            
+            // --- EVENT LISTENERS ---
+            function setupEventListeners() {
+                // Open modal
+                toolGrid.addEventListener('click', e => {
+                    const card = e.target.closest('.tool-card');
+                    if (card) {
+                        openModal(card.dataset.toolId);
+                    }
+                });
+
+                // Close modal
+                closeModalBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', e => {
+                    if (e.target === modal) {
+                        closeModal();
+                    }
+                });
+                
+                // Output actions
+                copyBtn.addEventListener('click', () => {
+                   navigator.clipboard.writeText(outputArea.innerText)
+                        .then(() => alert('Copied to clipboard!'))
+                        .catch(err => alert('Failed to copy.'));
+                });
+
+                pdfBtn.addEventListener('click', () => {
+                    const tool = tools.find(t => t.id === currentToolId);
+                    printArea.innerHTML = `
+                        <h1>${tool.name} Result</h1>
+                        <p>${new Date().toLocaleString()}</p>
+                        <hr>
+                        <pre style="white-space: pre-wrap; word-wrap: break-word;">${outputArea.innerText}</pre>
+                    `;
+                    window.print();
+                });
+                
+                txtBtn.addEventListener('click', () => {
+                    const text = outputArea.innerText;
+                    const blob = new Blob([text], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${currentToolId}_result.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            }
+            
+            function addToolSpecificListeners(toolId) {
+                const generateBtn = document.getElementById('generate-btn');
+                if (generateBtn) {
+                    generateBtn.addEventListener('click', () => handleGeneration(toolId));
+                }
+
+                // File Upload Handling for relevant tools
+                const fileInput = document.getElementById('file-input');
+                if (fileInput) {
+                    fileInput.addEventListener('change', (e) => handleFileUpload(e, 'text-input'));
+                }
+                const fileInput1 = document.getElementById('file-input-1');
+                 if (fileInput1) {
+                    fileInput1.addEventListener('change', (e) => handleFileUpload(e, 'text-input-1'));
+                }
+                const fileInput2 = document.getElementById('file-input-2');
+                 if (fileInput2) {
+                    fileInput2.addEventListener('change', (e) => handleFileUpload(e, 'text-input-2'));
+                }
+                
+                // Special listener for Pomodoro Timer
+                if (toolId === 'timer') {
+                    setupPomodoroTimer();
+                }
+            }
+            
+            function handleFileUpload(event, targetTextareaId) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById(targetTextareaId).value = e.target.result;
+                };
+                reader.readAsText(file);
+            }
+
+            // --- "AI" SIMULATION LOGIC ---
+            function handleGeneration(toolId) {
+                showLoader();
+                outputArea.innerHTML = '';
+                
+                // Simulate async processing
+                setTimeout(() => {
+                    const result = generateMockResult(toolId);
+                    outputArea.innerHTML = result;
+                    localStorage.setItem(`tool-output-${toolId}`, result);
+                    hideLoader();
+                }, 1500 + Math.random() * 1000);
+            }
+
+            function generateMockResult(toolId) {
+                const wordCountSelector = document.getElementById('word-count-selector');
+                const wordCount = wordCountSelector ? parseInt(wordCountSelector.value) : 600;
+
+                const LOREM_IPSUM = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi. Proin porttitor, orci nec nonummy molestie, enim est eleifend mi, non fermentum diam nisl sit amet erat. Duis semper. Duis arcu massa, scelerisque vitae, consequat in, pretium a, enim. Pellentesque congue. Ut in risus volutpat libero pharetra tempor. Cras vestibulum bibendum augue. Praesent egestas leo in pede. Praesent blandit odio eu enim. Pellentesque sed dui ut augue blandit sodales. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam nibh. Mauris ac mauris sed pede pellentesque fermentum. Maecenas adipiscing ante non diam. ";
+                const generateText = (count) => LOREM_IPSUM.repeat(Math.ceil(count / LOREM_IPSUM.split(' ').length)).split(' ').slice(0, count).join(' ');
+
+                let input = document.getElementById('text-input')?.value || 'Sample Topic';
+                
+                switch (toolId) {
+                    case 'essay':
+                        return `<h2>Essay on: ${input}</h2><p>${generateText(wordCount)}</p>`;
+                    case 'summary':
+                        return `<h3>Summary of Provided Text:</h3><p>${generateText(Math.floor(wordCount / 3))}</p>`;
+                    case 'grammar':
+                        return `<h3>Grammar & Spelling Analysis:</h3><p>Your text has been analyzed. Here are some suggestions:</p><ul><li><b>Correction 1:</b> In sentence '...', consider changing 'word' to 'better word' for clarity. <i>(Reason: Improved Phrasing)</i></li><li><b>Correction 2:</b> Potential spelling error found: 'mispelled'. Did you mean 'misspelled'? <i>(Reason: Spelling)</i></li></ul><p>${generateText(wordCount - 50)}</p>`;
+                    case 'flashcard':
+                        const lines = input.split('\n').filter(line => line.includes(':'));
+                        const cards = lines.map(line => {
+                           const parts = line.split(':');
+                           return `<strong>${parts[0].trim()}:</strong> ${parts[1] ? parts[1].trim() : ''}`;
+                        }).join('<br><br>');
+                        return `<h3>Generated Flashcards:</h3><p>${cards}</p><p>${generateText(wordCount - lines.length * 10)}</p>`;
+                    case 'citation':
+                        const style = document.getElementById('citation-style-selector').value;
+                        return `<h3>Citations (${style} Format):</h3><p>Author, A. A. (Year). <i>Title of work</i>. Publisher. ${generateText(wordCount / 2)}<br><br>Doe, J. (Year). <i>Another title</i>. Another Publisher. ${generateText(wordCount / 2)}</p>`;
+                    case 'plagiarism':
+                        let text1 = document.getElementById('text-input-1').value;
+                        let text2 = document.getElementById('text-input-2').value;
+                        return `<h3>Similarity Report:</h3><p>Analysis complete. A similarity score of <b>${(Math.random() * 30).toFixed(2)}%</b> was found.</p><p>Highlighted matches: <mark>${text1.substring(0,20)}...</mark> appears similar to <mark>${text2.substring(0,20)}...</mark></p><p>${generateText(wordCount)}</p>`;
+                    case 'mindmap':
+                         return `<h3>Mind Map for: ${input}</h3><pre>
+- Main Topic: ${input}
+    - Key Idea 1
+        - Detail A
+        - Detail B
+    - Key Idea 2
+        - Sub-point X
+        - Sub-point Y
+            - Further Detail
+    - Key Idea 3
+</pre><p>${generateText(wordCount)}</p>`;
+                    case 'translator':
+                        return `<h3>Translation Result:</h3><p>This is a simulated translation of your text.</p><p>${generateText(wordCount)}</p>`;
+                    default:
+                        return `Result for ${toolId} (Word Count: ${wordCount})`;
+                }
+            }
+            
+            // --- POMODORO TIMER LOGIC ---
+            function setupPomodoroTimer() {
+                let timerInterval;
+                let timeLeft = 25 * 60; // 25 minutes in seconds
+                let isPaused = true;
+                const timerDisplay = document.getElementById('timer-display');
+                const motivationDisplay = document.getElementById('timer-motivation');
+                const startBtn = document.getElementById('timer-start');
+                const pauseBtn = document.getElementById('timer-pause');
+                const resetBtn = document.getElementById('timer-reset');
+                const logArea = document.getElementById('text-input');
+
+                const motivationalTips = [
+                    "Great things are done by a series of small things brought together.",
+                    "Focus on being productive instead of busy.",
+                    "The secret of getting ahead is getting started.",
+                    "You are capable of amazing things.",
+                    "Believe you can and you're halfway there."
+                ];
+                
+                function updateDisplay() {
+                    const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                    const seconds = (timeLeft % 60).toString().padStart(2, '0');
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                }
+                
+                function startTimer() {
+                    if (isPaused) {
+                        isPaused = false;
+                        motivationDisplay.textContent = motivationalTips[Math.floor(Math.random() * motivationalTips.length)];
+                        timerInterval = setInterval(() => {
+                            timeLeft--;
+                            updateDisplay();
+                            if (timeLeft <= 0) {
+                                clearInterval(timerInterval);
+                                alert("Session complete! Time for a break.");
+                                logArea.value += `[${new Date().toLocaleTimeString()}] Completed a 25-minute study session.\n`;
+                                resetTimer();
+                            }
+                        }, 1000);
+                    }
+                }
+
+                function pauseTimer() {
+                    isPaused = true;
+                    clearInterval(timerInterval);
+                    motivationDisplay.textContent = "Paused. Take a deep breath!";
+                }
+                
+                function resetTimer() {
+                    isPaused = true;
+                    clearInterval(timerInterval);
+                    timeLeft = 25 * 60;
+                    updateDisplay();
+                    motivationDisplay.textContent = "Ready to start a new focused session?";
+                }
+
+                startBtn.onclick = startTimer;
+                pauseBtn.onclick = pauseTimer;
+                resetBtn.onclick = resetTimer;
+                
+                updateDisplay();
+            }
+
+            // --- START THE APP ---
+            initialize();
+        });
+    </script>
+</body>
+</html>
